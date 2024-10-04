@@ -26,6 +26,7 @@ package jdk.internal.constant;
 
 import java.lang.constant.ClassDesc;
 import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -37,6 +38,8 @@ import static java.lang.constant.DirectMethodHandleDesc.Kind.CONSTRUCTOR;
 import static java.util.Objects.requireNonNull;
 import static jdk.internal.constant.ConstantUtils.validateClassOrInterface;
 import static jdk.internal.constant.ConstantUtils.validateMemberName;
+import static jdk.internal.constant.ReferenceClassDescImpl.*;
+import static java.lang.constant.DirectMethodHandleDesc.Kind.STATIC;
 
 /**
  * A <a href="package-summary.html#nominal">nominal descriptor</a> for a direct
@@ -201,5 +204,26 @@ public final class DirectMethodHandleDescImpl implements DirectMethodHandleDesc 
     @Override
     public String toString() {
         return String.format("MethodHandleDesc[%s/%s::%s%s]", kind, owner.displayName(), name, invocationType.displayDescriptor());
+    }
+
+   private static final ClassDesc[] CONDY_BOOTSTRAP_ARGS = {
+            EARLY_BOOT_CD_MethodHandles_Lookup,
+            EARLY_BOOT_CD_String,
+            EARLY_BOOT_CD_Class};
+
+    /** Required to support initializing PrimitiveClassDescImpl before ConstantDescs */
+    public static final DirectMethodHandleDesc EARLY_BOOT_BSM_PRIMITIVE_CLASS
+            = ofConstantBootstrap(EARLY_BOOT_CD_ConstantBootstraps, "primitiveClass",
+            EARLY_BOOT_CD_Class);
+
+     public static DirectMethodHandleDesc ofConstantBootstrap(ClassDesc owner,
+                                                        String name,
+                                                        ClassDesc returnType,
+                                                        ClassDesc... paramTypes) {
+        int prefixLen = CONDY_BOOTSTRAP_ARGS.length;
+        ClassDesc[] fullParamTypes = new ClassDesc[paramTypes.length + prefixLen];
+        System.arraycopy(CONDY_BOOTSTRAP_ARGS, 0, fullParamTypes, 0, prefixLen);
+        System.arraycopy(paramTypes, 0, fullParamTypes, prefixLen, paramTypes.length);
+        return MethodHandleDesc.ofMethod(STATIC, owner, name, MethodTypeDescImpl.ofTrusted(returnType, fullParamTypes));
     }
 }

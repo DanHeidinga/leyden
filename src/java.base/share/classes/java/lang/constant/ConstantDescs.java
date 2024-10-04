@@ -24,6 +24,7 @@
  */
 package java.lang.constant;
 
+import jdk.internal.constant.DirectMethodHandleDescImpl;
 import jdk.internal.constant.MethodTypeDescImpl;
 import jdk.internal.constant.PrimitiveClassDescImpl;
 import jdk.internal.constant.ReferenceClassDescImpl;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static jdk.internal.constant.DirectMethodHandleDescImpl.EARLY_BOOT_BSM_PRIMITIVE_CLASS;
 import static java.lang.constant.DirectMethodHandleDesc.*;
 import static java.lang.constant.DirectMethodHandleDesc.Kind.STATIC;
 
@@ -71,10 +73,10 @@ public final class ConstantDescs {
     public static final ClassDesc CD_Object = ReferenceClassDescImpl.ofValidated("Ljava/lang/Object;");
 
     /** {@link ClassDesc} representing {@link String} */
-    public static final ClassDesc CD_String = ReferenceClassDescImpl.ofValidated("Ljava/lang/String;");
+    public static final ClassDesc CD_String = ReferenceClassDescImpl.EARLY_BOOT_CD_String;
 
     /** {@link ClassDesc} representing {@link Class} */
-    public static final ClassDesc CD_Class = ReferenceClassDescImpl.ofValidated("Ljava/lang/Class;");
+    public static final ClassDesc CD_Class = ReferenceClassDescImpl.EARLY_BOOT_CD_Class;
 
     /** {@link ClassDesc} representing {@link Number} */
     public static final ClassDesc CD_Number = ReferenceClassDescImpl.ofValidated("Ljava/lang/Number;");
@@ -122,7 +124,7 @@ public final class ConstantDescs {
     public static final ClassDesc CD_MethodHandles = ReferenceClassDescImpl.ofValidated("Ljava/lang/invoke/MethodHandles;");
 
     /** {@link ClassDesc} representing {@link MethodHandles.Lookup} */
-    public static final ClassDesc CD_MethodHandles_Lookup = ReferenceClassDescImpl.ofValidated("Ljava/lang/invoke/MethodHandles$Lookup;");
+    public static final ClassDesc CD_MethodHandles_Lookup = ReferenceClassDescImpl.EARLY_BOOT_CD_MethodHandles_Lookup;
 
     /** {@link ClassDesc} representing {@link MethodHandle} */
     public static final ClassDesc CD_MethodHandle = ReferenceClassDescImpl.ofValidated("Ljava/lang/invoke/MethodHandle;");
@@ -176,7 +178,7 @@ public final class ConstantDescs {
     public static final ClassDesc CD_DynamicCallSiteDesc = ReferenceClassDescImpl.ofValidated("Ljava/lang/constant/DynamicCallSiteDesc;");
 
     /** {@link ClassDesc} representing {@link ConstantBootstraps} */
-    public static final ClassDesc CD_ConstantBootstraps = ReferenceClassDescImpl.ofValidated("Ljava/lang/invoke/ConstantBootstraps;");
+    public static final ClassDesc CD_ConstantBootstraps = ReferenceClassDescImpl.EARLY_BOOT_CD_ConstantBootstraps;
 
     private static final ClassDesc[] INDY_BOOTSTRAP_ARGS = {
             CD_MethodHandles_Lookup,
@@ -189,9 +191,7 @@ public final class ConstantDescs {
             CD_Class};
 
     /** {@link MethodHandleDesc} representing {@link ConstantBootstraps#primitiveClass(Lookup, String, Class) ConstantBootstraps.primitiveClass} */
-    public static final DirectMethodHandleDesc BSM_PRIMITIVE_CLASS
-            = ofConstantBootstrap(CD_ConstantBootstraps, "primitiveClass",
-            CD_Class);
+    public static final DirectMethodHandleDesc BSM_PRIMITIVE_CLASS = DirectMethodHandleDescImpl.EARLY_BOOT_BSM_PRIMITIVE_CLASS;
 
     /** {@link MethodHandleDesc} representing {@link ConstantBootstraps#enumConstant(Lookup, String, Class) ConstantBootstraps.enumConstant} */
     public static final DirectMethodHandleDesc BSM_ENUM_CONSTANT
@@ -374,10 +374,6 @@ public final class ConstantDescs {
                                                              String name,
                                                              ClassDesc returnType,
                                                              ClassDesc... paramTypes) {
-        int prefixLen = CONDY_BOOTSTRAP_ARGS.length;
-        ClassDesc[] fullParamTypes = new ClassDesc[paramTypes.length + prefixLen];
-        System.arraycopy(CONDY_BOOTSTRAP_ARGS, 0, fullParamTypes, 0, prefixLen);
-        System.arraycopy(paramTypes, 0, fullParamTypes, prefixLen, paramTypes.length);
-        return MethodHandleDesc.ofMethod(STATIC, owner, name, MethodTypeDescImpl.ofTrusted(returnType, fullParamTypes));
+        return DirectMethodHandleDescImpl.ofConstantBootstrap(owner, name, returnType, paramTypes);
     }
 }

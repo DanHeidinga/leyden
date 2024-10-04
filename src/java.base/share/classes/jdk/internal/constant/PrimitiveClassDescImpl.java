@@ -82,7 +82,7 @@ public final class PrimitiveClassDescImpl
      * @jvms 4.3 Descriptors
      */
     private PrimitiveClassDescImpl(String descriptor) {
-        super(ConstantDescs.BSM_PRIMITIVE_CLASS, requireNonNull(descriptor), ConstantDescs.CD_Class);
+        super(DirectMethodHandleDescImpl.EARLY_BOOT_BSM_PRIMITIVE_CLASS, requireNonNull(descriptor), ReferenceClassDescImpl.EARLY_BOOT_CD_Class);
         this.descriptor = descriptor;
     }
 

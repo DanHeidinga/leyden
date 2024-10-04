@@ -35,6 +35,13 @@ import static jdk.internal.constant.ConstantUtils.*;
  * {@code Constant_Class_info} entry in the constant pool of a classfile.
  */
 public final class ReferenceClassDescImpl implements ClassDesc {
+    // cache locally to break <clinit> order dependency with PrimitiveClassDescImpl
+    public static final ClassDesc EARLY_BOOT_CD_Class = ofValidated("Ljava/lang/Class;");
+    public static final ClassDesc EARLY_BOOT_CD_ConstantBootstraps = ofValidated("Ljava/lang/invoke/ConstantBootstraps;");
+    public static final ClassDesc EARLY_BOOT_CD_MethodHandles_Lookup = ofValidated("Ljava/lang/invoke/MethodHandles$Lookup;");
+    public static final ClassDesc EARLY_BOOT_CD_String = ofValidated("Ljava/lang/String;");
+
+
     private final String descriptor;
 
     private ReferenceClassDescImpl(String descriptor) {
